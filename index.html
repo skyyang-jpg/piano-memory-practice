@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f5ef">
+  <title>背譜抽查室｜隨機小節練習</title>
+  <style>
+    :root { color-scheme: light; --ink:#25252a; --muted:#6d6c72; --line:#ddd9d1; --paper:#f8f5ef; --card:#fffefa; --purple:#6755a6; --purple-light:#eee9fa; --green:#437d67; --red:#b25b63; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at 10% 0%,#eee9fa 0,transparent 34%),var(--paper); color:var(--ink); font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    button,input { font:inherit; }
+    button { cursor:pointer; }
+    .wrap { width:min(100% - 32px,860px); margin:0 auto; padding:45px 0 60px; }
+    header { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:25px; }
+    .eyebrow { font-size:.83rem; letter-spacing:.14em; color:var(--purple); font-weight:800; }
+    h1 { margin:7px 0 8px; font-family:Georgia,"Noto Serif TC",serif; font-size:clamp(2.25rem,6vw,3.5rem); letter-spacing:-.05em; }
+    .subtitle { margin:0; color:var(--muted); line-height:1.7; }
+    .music-mark { width:60px; height:60px; border-radius:18px; display:grid; place-items:center; background:var(--purple-light); color:var(--purple); font-size:2rem; flex:none; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:20px; box-shadow:0 14px 36px rgba(57,45,63,.045); padding:24px; }
+    .setup { margin-bottom:16px; }
+    h2 { font-size:1.06rem; margin:0 0 17px; }
+    .fields { display:grid; grid-template-columns:minmax(180px,2fr) minmax(95px,1fr) minmax(95px,1fr); gap:12px; }
+    label { display:block; color:var(--muted); font-size:.86rem; font-weight:700; }
+    input { display:block; width:100%; margin-top:7px; padding:12px 13px; border:1px solid var(--line); border-radius:11px; background:white; color:var(--ink); outline:none; }
+    input:focus { border-color:var(--purple); box-shadow:0 0 0 3px var(--purple-light); }
+    .help { margin:13px 0 0; color:var(--muted); font-size:.83rem; line-height:1.6; }
+    .error { min-height:1.3em; color:var(--red); font-size:.87rem; margin:7px 0 0; }
+    .practice { text-align:center; padding:30px 24px 26px; }
+    .badge { display:inline-block; background:var(--purple-light); color:var(--purple); padding:7px 12px; border-radius:999px; font-size:.79rem; font-weight:800; }
+    .prompt { color:var(--muted); margin:22px 0 4px; font-size:.95rem; }
+    .measure { font-family:Georgia,"Noto Serif TC",serif; font-weight:700; font-size:clamp(4rem,16vw,7rem); letter-spacing:-.08em; line-height:1.16; font-variant-numeric:tabular-nums; }
+    .measure small { font-family:system-ui,sans-serif; font-size:.25em; letter-spacing:0; font-weight:600; color:var(--muted); margin-left:.3em; }
+    .timer { margin:10px 0 23px; color:var(--muted); font-variant-numeric:tabular-nums; }
+    .actions { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; }
+    .btn { border:1px solid var(--line); border-radius:11px; background:#fff; color:var(--ink); padding:11px 17px; font-weight:750; min-height:46px; transition:transform .12s,background .12s; }
+    .btn:hover { transform:translateY(-2px); background:#f8f6fb; }
+    .btn:focus-visible { outline:3px solid #b7a9df; outline-offset:2px; }
+    .btn:disabled { opacity:.42; cursor:not-allowed; transform:none; }
+    .primary { background:var(--purple); color:white; border-color:var(--purple); }
+    .primary:hover { background:#59478f; }
+    .success { background:#ebf5ef; color:var(--green); border-color:#d4e6dc; }
+    .retry { background:#fff0ef; color:var(--red); border-color:#f3dbdb; }
+    .hint { min-height:1.4em; color:var(--muted); margin:19px 0 0; font-size:.89rem; }
+    .bottom { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .stat { border-radius:13px; background:#f7f5f3; padding:13px 10px; text-align:center; }
+    .stat strong { display:block; font-size:1.55rem; font-variant-numeric:tabular-nums; }
+    .stat span { color:var(--muted); font-size:.77rem; }
+    .reset { background:none; border:0; padding:7px 0; color:var(--muted); text-decoration:underline; text-underline-offset:3px; margin-top:14px; font-size:.83rem; }
+    .log { margin:0; padding:0; list-style:none; max-height:170px; overflow:auto; }
+    .log li { display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-top:1px solid #eeeae5; font-size:.87rem; }
+    .log li:first-child { border-top:0; }
+    .log .pass { color:var(--green); }
+    .log .miss { color:var(--red); }
+    .empty { color:var(--muted); font-size:.86rem; line-height:1.6; }
+    footer { text-align:center; margin-top:22px; color:var(--muted); font-size:.78rem; }
+    @media(max-width:650px) { .wrap{padding-top:27px} .fields{grid-template-columns:1fr 1fr} .fields label:first-child{grid-column:1/-1} .bottom{grid-template-columns:1fr} .card{padding:19px} header{align-items:center} .music-mark{width:49px;height:49px;font-size:1.6rem} }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div><div class="eyebrow">PIANO PRACTICE</div><h1>背譜抽查室</h1><p class="subtitle">不用每次都從頭彈。抽一個小節，試著從那裡接下去。</p></div>
+      <div class="music-mark" aria-hidden="true">♫</div>
+    </header>
+
+    <section class="card setup" aria-labelledby="setup-title">
+      <h2 id="setup-title">設定今天的範圍</h2>
+      <div class="fields">
+        <label>曲名<input id="piece" type="text" maxlength="60" placeholder="例如：英雄波蘭舞曲" value="今天練的曲子"></label>
+        <label>起始小節<input id="start" type="number" min="1" max="9999" step="1" value="1" inputmode="numeric"></label>
+        <label>結束小節<input id="end" type="number" min="1" max="9999" step="1" value="32" inputmode="numeric"></label>
+      </div>
+      <p class="help">抽查時先不看譜；從指定小節開始彈，完成後自己按「成功」或「再練一次」。曲名和範圍會保存在這台裝置。</p>
+      <p class="error" id="error" role="alert"></p>
+    </section>
+
+    <section class="card practice" aria-label="隨機抽查">
+      <span class="badge" id="current-piece">今天練的曲子</span>
+      <p class="prompt" id="prompt">準備好就按「抽一個小節」</p>
+      <div class="measure" aria-live="polite"><span id="measure">—</span><small>小節</small></div>
+      <p class="timer" id="timer">練習計時 00:00</p>
+      <div class="actions">
+        <button class="btn primary" id="draw" type="button">抽一個小節</button>
+        <button class="btn success" id="pass" type="button" disabled>✓ 成功接下去</button>
+        <button class="btn retry" id="miss" type="button" disabled>↻ 再練一次</button>
+      </div>
+      <p class="hint" id="hint" aria-live="polite">可以只練左手，或從這小節合手開始。</p>
+    </section>
+
+    <div class="bottom">
+      <section class="card" aria-labelledby="stats-title">
+        <h2 id="stats-title">這台裝置的練習紀錄</h2>
+        <div class="stats">
+          <div class="stat"><strong id="total">0</strong><span>已完成抽查</span></div>
+          <div class="stat"><strong id="correct">0</strong><span>成功</span></div>
+          <div class="stat"><strong id="rate">—</strong><span>成功率</span></div>
+        </div>
+        <button class="reset" type="button" id="reset">清空練習紀錄</button>
+      </section>
+      <section class="card" aria-labelledby="history-title">
+        <h2 id="history-title">最近紀錄</h2>
+        <ol class="log" id="history"></ol>
+        <p class="empty" id="empty">還沒有紀錄。先抽一個小節試試看。</p>
+      </section>
+    </div>
+    <footer>這是自我練習工具，成功與否由你判斷；網頁不會錄音或自動辨識音符。</footer>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+      const $ = id => document.getElementById(id);
+      const keys = { settings: 'piano-practice-settings-v1', history: 'piano-practice-history-v1' };
+      const state = { active: null, last: null, startedAt: null, elapsed: 0, records: [] };
+      const safeRead = key => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
+      const safeWrite = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* Private mode can block storage; session still works. */ } };
+      const saved = safeRead(keys.settings);
+      if (saved && typeof saved === 'object') {
+        if (typeof saved.piece === 'string') $('piece').value = saved.piece.slice(0,60);
+        if (Number.isInteger(saved.start)) $('start').value = saved.start;
+        if (Number.isInteger(saved.end)) $('end').value = saved.end;
+      }
+      const records = safeRead(keys.history);
+      if (Array.isArray(records)) {
+        state.records = records.filter(x => x && Number.isInteger(x.measure) && typeof x.pass === 'boolean' && typeof x.piece === 'string').slice(0,100);
+      }
+      function settings() {
+        const piece = $('piece').value.trim() || '未命名曲子';
+        const start = Number($('start').value), end = Number($('end').value);
+        if (!Number.isInteger(start) || !Number.isInteger(end) || start < 1 || end > 9999 || start > end) {
+          $('error').textContent = '請填入 1～9999 的整數小節，且起始小節不能大於結束小節。';
+          return null;
+        }
+        $('error').textContent = '';
+        safeWrite(keys.settings, { piece, start, end });
+        return { piece, start, end };
+      }
+      function clock() {
+        const seconds = state.elapsed + (state.startedAt === null ? 0 : Math.floor((Date.now() - state.startedAt) / 1000));
+        $('timer').textContent = '練習計時 ' + String(Math.floor(seconds / 60)).padStart(2,'0') + ':' + String(seconds % 60).padStart(2,'0');
+      }
+      function controls() {
+        $('pass').disabled = state.active === null;
+        $('miss').disabled = state.active === null;
+        $('draw').textContent = state.active === null ? '抽一個小節' : '換一個小節';
+      }
+      function render() {
+        const total = state.records.length, correct = state.records.filter(x => x.pass).length;
+        $('total').textContent = total;
+        $('correct').textContent = correct;
+        $('rate').textContent = total ? Math.round(correct / total * 100) + '%' : '—';
+        $('history').replaceChildren();
+        $('empty').hidden = total > 0;
+        for (const item of state.records.slice(0,8)) {
+          const li = document.createElement('li');
+          const name = document.createElement('span'); name.textContent = item.piece + ' · 第 ' + item.measure + ' 小節';
+          const result = document.createElement('span'); result.textContent = item.pass ? '成功' : '再練'; result.className = item.pass ? 'pass' : 'miss';
+          li.append(name,result); $('history').append(li);
+        }
+        controls(); clock();
+      }
+      function draw() {
+        const s = settings(); if (!s) return;
+        if (state.startedAt === null) state.startedAt = Date.now();
+        const count = s.end - s.start + 1;
+        let index = Math.floor(Math.random() * count);
+        if (count > 1 && state.last !== null && state.last >= s.start && state.last <= s.end) {
+          index = Math.floor(Math.random() * (count - 1));
+          const old = state.last - s.start;
+          if (index >= old) index++;
+        }
+        state.active = s.start + index; state.last = state.active;
+        $('measure').textContent = state.active;
+        $('current-piece').textContent = s.piece;
+        $('prompt').textContent = '不看譜，從這裡開始';
+        $('hint').textContent = '彈完後，記得自己標記結果。';
+        controls(); clock();
+      }
+      function record(pass) {
+        if (state.active === null) return;
+        const s = settings();
+        const piece = s ? s.piece : $('current-piece').textContent;
+        state.records.unshift({piece, measure:state.active, pass});
+        state.records = state.records.slice(0,100);
+        safeWrite(keys.history,state.records);
+        $('hint').textContent = pass ? '接得上！再抽一段試試。' : '沒關係，放慢速度或先練左手，再試一次。';
+        $('prompt').textContent = pass ? '這段已完成' : '這段先記下來，之後再練';
+        state.active = null;
+        render();
+      }
+      $('draw').addEventListener('click',draw);
+      $('pass').addEventListener('click',() => record(true));
+      $('miss').addEventListener('click',() => record(false));
+      $('reset').addEventListener('click',() => {
+        if (!confirm('確定要清空這台裝置上的練習紀錄與計時嗎？')) return;
+        state.records = []; state.active = null; state.last = null; state.startedAt = null; state.elapsed = 0;
+        safeWrite(keys.history,[]);
+        $('measure').textContent = '—'; $('prompt').textContent = '準備好就按「抽一個小節」'; $('hint').textContent = '紀錄已清空，可以重新開始。';
+        render();
+      });
+      $('piece').addEventListener('input',() => { $('current-piece').textContent = $('piece').value.trim() || '未命名曲子'; settings(); });
+      for (const id of ['start','end']) $(id).addEventListener('change',settings);
+      setInterval(clock,1000);
+      $('current-piece').textContent = $('piece').value.trim() || '未命名曲子';
+      render();
+    })();
+  </script>
+</body>
+</html>
