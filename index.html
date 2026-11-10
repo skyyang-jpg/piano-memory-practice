@@ -17,6 +17,10 @@
     h1 { margin:7px 0 8px; font-family:Georgia,"Noto Serif TC",serif; font-size:clamp(2.25rem,6vw,3.5rem); letter-spacing:-.05em; }
     .subtitle { margin:0; color:var(--muted); line-height:1.7; }
     .music-mark { width:60px; height:60px; border-radius:18px; display:grid; place-items:center; background:var(--purple-light); color:var(--purple); font-size:2rem; flex:none; }
+    .page-links { margin:-8px 0 22px; }
+    .page-links a { display:inline-block; color:var(--purple); font-weight:750; text-decoration:none; padding:8px 0; }
+    .page-links a:hover { text-decoration:underline; }
+    .page-links a:focus-visible { outline:3px solid #b7a9df; outline-offset:2px; }
     .card { background:var(--card); border:1px solid var(--line); border-radius:20px; box-shadow:0 14px 36px rgba(57,45,63,.045); padding:24px; }
     .setup { margin-bottom:16px; }
     h2 { font-size:1.06rem; margin:0 0 17px; }
@@ -64,6 +68,10 @@
       <div><div class="eyebrow">PIANO PRACTICE</div><h1>背譜抽查室</h1><p class="subtitle">不用每次都從頭彈。抽一個小節，試著從那裡接下去。</p></div>
       <div class="music-mark" aria-hidden="true">♫</div>
     </header>
+
+    <nav class="page-links" aria-label="頁面導覽">
+      <a href="notes.html">📖 閱讀背譜練習筆記 →</a>
+    </nav>
 
     <section class="card setup" aria-labelledby="setup-title">
       <h2 id="setup-title">設定今天的範圍</h2>
